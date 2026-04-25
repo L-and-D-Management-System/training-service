@@ -1,0 +1,13 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  call-workflow:
+    uses: L-and-D-Management-System/LnD/.github/workflows/reusable-ci.yaml@main
+    with:
+      service_name: training-service
+      image_name: training-service
+    secrets: inherit
