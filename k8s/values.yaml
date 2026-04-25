@@ -1,0 +1,18 @@
+replicaCount: 2
+
+image:
+  repository: chandu554/training-ld-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 3003
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi

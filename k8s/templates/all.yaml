@@ -1,0 +1,57 @@
+{{- define "training-service.labels" -}}
+app: training
+{{- end }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: training-rollout
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {app: training}
+  template:
+    metadata:
+      labels: {app: training}
+    spec:
+      containers:
+        - name: training-cont
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+            - configMapRef: {name: training-config}
+            - secretRef: {name: training-secret}
+  strategy:
+    blueGreen: 
+      activeService: training-svc
+      previewService: training-svc-preview
+---
+apiVersion: v1
+kind: Service
+metadata: {name: training-svc}
+spec:
+  ports: [{port: 3003, targetPort: 3003}]
+  selector: {app: training}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: training-svc-preview}
+spec:
+  ports: [{port: 3003, targetPort: 3003}]
+  selector: {app: training}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: training-config
+data:
+  PORT: "3003"
+  NODE_ENV: "production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: training-secret
+type: Opaque
+stringData:
+  MONGO_URI: {{ .Values.global.mongo.uri | quote }}
+  JWT_SECRET: {{ .Values.global.jwtSecret | quote }}
