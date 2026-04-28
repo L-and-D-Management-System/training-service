@@ -32,6 +32,6 @@ jobs:
       release_tag: ${{ inputs.release_tag }}
       service_name: training-service
       dev_manifest_path: infra_new/argocd/dev/training-service.yaml
-      prod_manifest_path: ${{ format('infra_new/argocd/prod/{0}', (split-path infra_new/argocd/dev/training-service.yaml -leaf)) }}
+      prod_manifest_path: infra_new/argocd/prod/training-service.yaml
     secrets:
       TOKEN: ${{ secrets.GHCR_PAT }}
