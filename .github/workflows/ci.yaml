@@ -1,17 +1,14 @@
 name: training-service CI/CD
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Release tag in the format training-service-vX.Y.Z
+        description: 'Release Tag (e.g. v1.0.0)'
         required: true
         type: string
 
@@ -20,23 +17,13 @@ jobs:
     if: github.event_name != 'workflow_dispatch'
     uses: L-and-D-Management-System/LnD/.github/workflows/reusable-ci.yaml@main
     with:
-      trigger_event: ${{ github.event_name }}
-      source_sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       service_name: training-service
       image_name: training-service
-      dev_manifest_path: gitops/apps/dev/training-app.yaml
-      docker_context: .
-      dockerfile_path: ./Dockerfile
-      working_directory: .
+      dev_manifest_path: infra_new/argocd/dev/training-service.yaml
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_URL: ${{ secrets.SONAR_URL }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       TOKEN: ${{ secrets.GHCR_PAT }}
-      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   release:
     if: github.event_name == 'workflow_dispatch'
@@ -44,10 +31,7 @@ jobs:
     with:
       release_tag: ${{ inputs.release_tag }}
       service_name: training-service
-      image_name: training-service
-      dev_manifest_path: gitops/apps/dev/training-app.yaml
-      prod_manifest_path: gitops/apps/prod/training-app.yaml
+      dev_manifest_path: infra_new/argocd/dev/training-service.yaml
+      prod_manifest_path: ${{ format('infra_new/argocd/prod/{0}', (split-path infra_new/argocd/dev/training-service.yaml -leaf)) }}
     secrets:
       TOKEN: ${{ secrets.GHCR_PAT }}
-      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
