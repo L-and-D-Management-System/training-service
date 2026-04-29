@@ -1,37 +1,59 @@
-name: training-service CI/CD
+name: CI/CD
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: 'Release Tag (e.g. v1.0.0)'
-        required: true
-        type: string
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  ci:
-    if: github.event_name != 'workflow_dispatch'
-    uses: L-and-D-Management-System/LnD/.github/workflows/reusable-ci.yaml@main
-    with:
-      service_name: training-service
-      image_name: training-service
-      dev_manifest_path: infra_new/argocd/dev/training-service.yaml
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      TOKEN: ${{ secrets.GHCR_PAT }}
+  pipeline:
+    uses: L-and-D-Management-System/l-and-d-main/.github/workflows/backend.yml@dev
 
-  release:
-    if: github.event_name == 'workflow_dispatch'
-    uses: L-and-D-Management-System/LnD/.github/workflows/reusable-release.yaml@main
     with:
-      release_tag: ${{ inputs.release_tag }}
-      service_name: training-service
-      dev_manifest_path: infra_new/argocd/dev/training-service.yaml
-      prod_manifest_path: infra_new/argocd/prod/training-service.yaml
-    secrets:
-      TOKEN: ${{ secrets.GHCR_PAT }}
+      service: "api-gateway-lnd"
+      image: ghcr.io/l-and-d-management-system/training
+      trigger: ${{ github.event_name }}
+
+    secrets: inherit
+# name: training-service CI/CD
+
+# on:
+#   push:
+#     branches: [ main, develop ]
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+#     inputs:
+#       release_tag:
+#         description: 'Release Tag (e.g. v1.0.0)'
+#         required: true
+#         type: string
+
+# jobs:
+#   ci:
+#     if: github.event_name != 'workflow_dispatch'
+#     uses: L-and-D-Management-System/LnD/.github/workflows/reusable-ci.yaml@main
+#     with:
+#       service_name: training-service
+#       image_name: training-service
+#       dev_manifest_path: infra_new/argocd/dev/training-service.yaml
+#     secrets:
+#       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#       TOKEN: ${{ secrets.GHCR_PAT }}
+
+#   release:
+#     if: github.event_name == 'workflow_dispatch'
+#     uses: L-and-D-Management-System/LnD/.github/workflows/reusable-release.yaml@main
+#     with:
+#       release_tag: ${{ inputs.release_tag }}
+#       service_name: training-service
+#       dev_manifest_path: infra_new/argocd/dev/training-service.yaml
+#       prod_manifest_path: infra_new/argocd/prod/training-service.yaml
+#     secrets:
+#       TOKEN: ${{ secrets.GHCR_PAT }}
